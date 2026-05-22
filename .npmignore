@@ -1,0 +1,28 @@
+# 测试文件
+test.js
+
+# GitHub Actions 工作流（npm 包不需要）
+.github/
+
+# 开发工具配置
+.eslintrc*
+.prettierrc*
+.editorconfig
+*.config.js
+*.config.ts
+jest.config.*
+
+# 覆盖率 & 构建产物
+coverage/
+dist/
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# 日志
+*.log
+npm-debug.log*
+
+# 测试产物
+duck_recovered.*
