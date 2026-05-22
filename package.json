@@ -1,0 +1,22 @@
+{
+  "name": "ss-tools-duck",
+  "version": "1.0.0",
+  "description": "Node.js implementation of SS_tools duck steganography encoder/decoder",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "bin": {
+    "duck-encode": "./duck-cli.js",
+    "duck-decode": "./duck-cli.js",
+    "duck-cli": "./duck-cli.js"
+  },
+  "scripts": {
+    "test": "node test.js",
+    "cli": "node duck-cli.js"
+  },
+  "dependencies": {
+    "fluent-ffmpeg": "^2.1.3",
+    "glob": "^11.0.0",
+    "sharp": "^0.33.0"
+  }
+}
+

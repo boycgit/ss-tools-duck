@@ -1,0 +1,62 @@
+name: Publish to npm
+
+# 触发方式一：在 GitHub Releases 页面创建新 Release（推荐）
+# 触发方式二：手动触发并指定版本号（可选）
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: "版本号升级类型（patch / minor / major）"
+        required: false
+        default: "patch"
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write   # 写 package.json 版本并 push tag
+      id-token: write   # npm provenance（可溯源发布）
+
+    steps:
+      # ── 检出代码 ─────────────────────────────────────────────────────────────
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      # ── 配置 Node.js + npm registry ──────────────────────────────────────────
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          registry-url: "https://registry.npmjs.org"
+          cache: "npm"
+
+      # ── 安装依赖 & 跑测试 ─────────────────────────────────────────────────────
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+      # ── 手动触发时：自动升级版本号 & 提交 tag ────────────────────────────────
+      - name: Bump version (manual trigger only)
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          npm version ${{ github.event.inputs.bump }} -m "chore: bump version to %s [skip ci]"
+          git push --follow-tags
+
+      # ── 发布到 npm ────────────────────────────────────────────────────────────
+      - name: Publish to npm
+        run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
