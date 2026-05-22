@@ -4,6 +4,14 @@
   "description": "Node.js implementation of SS_tools duck steganography encoder/decoder",
   "main": "index.js",
   "types": "index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/boycgit/ss-tools-duck.git"
+  },
+  "homepage": "https://github.com/boycgit/ss-tools-duck#readme",
+  "bugs": {
+    "url": "https://github.com/boycgit/ss-tools-duck/issues"
+  },
   "bin": {
     "duck-encode": "./duck-cli.js",
     "duck-decode": "./duck-cli.js",

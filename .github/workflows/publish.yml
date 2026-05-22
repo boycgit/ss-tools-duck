@@ -1,7 +1,7 @@
 name: Publish to npm
 
 # 触发方式一：在 GitHub Releases 页面创建新 Release（推荐）
-# 触发方式二：手动触发并指定版本号（可选）
+# 触发方式二：手动触发并指定版本号
 on:
   release:
     types: [published]
@@ -21,8 +21,8 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     permissions:
-      contents: write   # 写 package.json 版本并 push tag
-      id-token: write   # npm provenance（可溯源发布）
+      contents: write   # 写 package.json 版本并 push tag（手动触发时）
+      id-token: write   # OIDC Trusted Publishing（必需）
 
     steps:
       # ── 检出代码 ─────────────────────────────────────────────────────────────
@@ -31,13 +31,14 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      # ── 配置 Node.js + npm registry ──────────────────────────────────────────
+      # ── 配置 Node.js 22 + npm registry ───────────────────────────────────────
+      # OIDC Trusted Publishing 要求 npm CLI >= 11.5.1 / Node >= 22.14.0
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "22"
           registry-url: "https://registry.npmjs.org"
-          cache: "npm"
+          package-manager-cache: false   # 发布构建不使用缓存（官方建议）
 
       # ── 安装依赖 & 跑测试 ─────────────────────────────────────────────────────
       - name: Install dependencies
@@ -55,8 +56,8 @@ jobs:
           npm version ${{ github.event.inputs.bump }} -m "chore: bump version to %s [skip ci]"
           git push --follow-tags
 
-      # ── 发布到 npm ────────────────────────────────────────────────────────────
+      # ── 发布到 npm（使用 OIDC Trusted Publishing，无需 NPM_TOKEN）────────────
+      # 使用前提：在 npmjs.com 包设置中已配置 Trusted Publisher（GitHub Actions）
+      # 不需要 NODE_AUTH_TOKEN；npm CLI 自动从 OIDC 换取短期凭证
       - name: Publish to npm
-        run: npm publish --provenance --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --access public
